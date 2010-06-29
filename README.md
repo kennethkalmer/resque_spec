@@ -120,6 +120,54 @@ You can check the size of the queue in your specs too.
       end
     end
 
+Running Resque in Specs
+------------------------
+
+Given this scenario
+
+    Given a person
+    When I recalculate
+    Then the person has calculate queued
+    When the job has finished
+    Then the person should have calculated
+
+And I write this spec using the `resque_spec` matcher
+
+    describe "#recalculate" do
+      before do
+        ResqueSpec.reset!
+      end
+
+      it "calculates in the background" do
+        person.recalculate
+
+        ResqueSpec.run!
+        person.calculated.should be
+      end
+    end
+
+(And I take note of the `before` block that is calling `reset!` for every spec)
+
+And I might write this as a Cucumber step
+  
+    When /the job(s?) ha(s|ve) finished/ do
+      ResqueSpec.run!
+    end
+
+Then I write some code to make it pass:
+
+    class Person
+      @queue = :people
+
+      def recalculate
+        Resque.enqueue(Person, id, :calculate)
+      end
+
+      def calculated
+        @calculated = true
+      end
+    end
+
 Note on Patches/Pull Requests
 =============================
 

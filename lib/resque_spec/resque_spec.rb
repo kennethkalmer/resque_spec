@@ -30,6 +30,14 @@ module ResqueSpec
     queues.clear
   end
 
+  def run!
+    @queues.each do |k,v|
+      while job = v.shift
+        job[:klass].perform(*job[:args])
+      end
+    end
+  end
+
   module Resque
     def enqueue(klass, *args)
       ResqueSpec.queue_for(klass) << {:klass => klass, :args => args}

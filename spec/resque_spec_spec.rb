@@ -81,6 +81,23 @@ describe "ResqueSpec" do
 
   end
 
+  describe "run!" do
+    it "runs queued jobs" do
+      $_job_has_run = false
+      class InlineJob
+        @queue = :spec
+        def self.perform
+          $job_has_run = true
+        end
+      end
+
+      Resque.enqueue( InlineJob )
+      ResqueSpec.run!
+
+      $job_has_run.should be
+    end
+  end
+
   describe "Resque" do
     describe "#enqueue" do
 
