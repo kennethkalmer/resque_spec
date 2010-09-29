@@ -2,9 +2,11 @@ ResqueSpec
 ==========
 
 A simple RSpec and Cucumber matcher for Resque.enqueue and Resque.enqueue_at (from `ResqueScheduler`), loosely based on
-[http://github.com/justinweiss/resque_unit](resque_unit).
+[http://github.com/justinweiss/resque_unit](http://github.com/justinweiss/resque_unit).
 
-This should work with Resque v1.6.0 and up and RSpec v1.3.0 and up.
+This should work with `Resque v1.6.0` and up and `RSpec v2.0.0.beta.12` and up.
+
+If you are using `RSpec ~> 1.3.0`, you should use version `~> 0.2.0`.
 
 Install
 -------
@@ -99,6 +101,22 @@ Then I write some code to make it pass:
 
       def recalculate
         Resque.enqueue_at(Time.now + 3600, Person, id, :calculate)
+      end
+    end
+
+Queue Size Specs
+----------------
+
+You can check the size of the queue in your specs too.
+
+    describe "#recalculate" do
+      before do
+        ResqueSpec.reset!
+      end
+
+      it "adds an entry to the Person queue" do
+        person.recalculate
+        Person.should have_queue_size_of(1)
       end
     end
 
